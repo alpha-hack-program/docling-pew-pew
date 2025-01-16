@@ -1,4 +1,4 @@
-# 🎉 Welcome to the Remote OpenShift AI Hackathon 🎉
+# 🎉 Welcome to the OpenShift AI Hackathon 🎉
 
 Get ready for an exciting journey where innovation meets cutting-edge technology! 🌟  
 This hackathon challenges you to create impactful tools for Red Hat Consulting using the Red Hat OpenShift AI portfolio: **Workbenches**, **Data Science Pipelines**, **Model Serving**, and more.
@@ -11,17 +11,16 @@ With Red Hat OpenShift AI’s robust hybrid cloud platform ☁️, participants 
 - **Retrieval-augmented generation (RAG) workflows**  
 - **Context-aware question-answering systems**
 
-This hackathon is your opportunity to explore these technologies and create impactful solutions for real-world problems.
+This hackathon is the opportunity to explore these technologies and create impactful solutions for real-world problems.
+
+
+> [!IMPORTANT]  
+> This main Readme refers to the starting point of the Hackathon. If you want to check the actual final solution, please, refer to this [README file](./project/README.md).
+
 
 ---
 
 ## 🔑 Key Technologies
-
-### **Docling**  
-An open-source tool for advanced document parsing and conversion:  
-- Supports formats like PDFs, DOCX, PPTX, and HTML 📑  
-- Integrates with tools like **LlamaIndex** and **LangChain** for RAG tasks 🦙  
-- Preserves context in complex layouts (e.g., multi-column text or tables spanning pages) 📊  
 
 ### **Red Hat OpenShift AI**  
 A hybrid cloud platform optimized for deploying generative AI workloads 🌐:  
@@ -29,9 +28,29 @@ A hybrid cloud platform optimized for deploying generative AI workloads 🌐:
 - Combines **IBM’s Granite LLMs** with **Red Hat’s InstructLab tools** 🛠️  
 - Enables fine-tuning and deployment of custom models across cloud environments 🚉  
 
-### **OpenWebUI**  
-An extensible, self-hosted AI interface that adapts to your workflow, all while operating entirely offline.
+### **Docling**  
+An open-source tool for advanced document parsing and conversion:  
+- Supports formats like PDFs, DOCX, PPTX, and HTML 📑  
+- Integrates with tools like **LlamaIndex** and **LangChain** for RAG tasks 🦙  
+- Preserves context in complex layouts (e.g., multi-column text or tables spanning pages) 📊  
 
+## Milvus
+
+An open-source vector database designed for similarity search and RAG:
+
+* Manages large-scale embeddings from unstructured data sources 🔍
+* Integrates with tools like LangChain for seamless retrieval workflows 🛠️
+* Optimized for high-performance similarity search, enabling fast query results even with billions of vectors ⚡
+* Supports hybrid storage (disk and memory) to balance cost and performance 💼
+
+### **Open WebUI**  
+
+A versatile, self-hosted AI interface designed for maximum adaptability and security:
+
+* Fully offline operation ensures data privacy and control 🔐
+* Customizable workflows tailored to diverse use cases, from research to production 🔄
+* Modular architecture supports seamless integration with third-party tools and APIs 🔗
+* Intuitive interface simplifies interaction with advanced AI systems, enhancing productivity 🚀
 ---
 
 ## 📂 Repository Structure
@@ -67,8 +86,12 @@ This repo contains the following key folders:
 ## 🛠️ Deployed Infrastructure
 
 1. **OpenShift on AWS** was deployed using [Alvaro's scripts](https://github.com/alvarolop/ocp-on-aws).  
-2. **RHOAI** was deployed using [Alvaro's scripts](https://github.com/alvarolop/rhoai-gitops/tree/47eed92c51aa148bd37aaef2bb05d34012c26e87?tab=readme-ov-file#32-lets-install).  
-
+2. **RHOAI** was deployed using [Alvaro's scripts](https://github.com/alvarolop/rhoai-gitops/tree/c1ab1577d320d43fad41b52203a302ffc4af21f4?tab=readme-ov-file#32-lets-install).
+3. Several components were deployed using GitOps and the same repository:
+   1. **Inference Server for Mistral** using [ArgoCD app](https://github.com/alvarolop/rhoai-gitops/blob/c1ab1577d320d43fad41b52203a302ffc4af21f4/application-serve-mistral-7b.yaml).
+   2. **Inference Server for Nomic Embed** using [ArgoCD app](https://github.com/alvarolop/rhoai-gitops/blob/c1ab1577d320d43fad41b52203a302ffc4af21f4/application-serve-nomic-embed-text-v1.yaml).
+   3. **Milvus** using [ArgoCD app](https://github.com/alvarolop/rhoai-gitops/blob/c1ab1577d320d43fad41b52203a302ffc4af21f4/application-milvus.yaml).
+   4. **Open WebUI** using [ArgoCD app](https://github.com/alvarolop/rhoai-gitops/blob/c1ab1577d320d43fad41b52203a302ffc4af21f4/application-open-webui.yaml).
 ---
 
 ## 📚 Useful Resources
