@@ -34,7 +34,7 @@ An open-source tool for advanced document parsing and conversion:
 - Integrates with tools like **LlamaIndex** and **LangChain** for RAG tasks 🦙  
 - Preserves context in complex layouts (e.g., multi-column text or tables spanning pages) 📊  
 
-## Milvus
+### Milvus
 
 An open-source vector database designed for similarity search and RAG:
 
@@ -83,16 +83,6 @@ This repo contains the following key folders:
 
 ---
 
-## 🛠️ Deployed Infrastructure
-
-1. **OpenShift on AWS** was deployed using [Alvaro's scripts](https://github.com/alvarolop/ocp-on-aws).  
-2. **RHOAI** was deployed using [Alvaro's scripts](https://github.com/alvarolop/rhoai-gitops/tree/c1ab1577d320d43fad41b52203a302ffc4af21f4?tab=readme-ov-file#32-lets-install).
-3. Several components were deployed using GitOps and the same repository:
-   1. **Inference Server for Mistral** using [ArgoCD app](https://github.com/alvarolop/rhoai-gitops/blob/c1ab1577d320d43fad41b52203a302ffc4af21f4/application-serve-mistral-7b.yaml).
-   2. **Inference Server for Nomic Embed** using [ArgoCD app](https://github.com/alvarolop/rhoai-gitops/blob/c1ab1577d320d43fad41b52203a302ffc4af21f4/application-serve-nomic-embed-text-v1.yaml).
-   3. **Milvus** using [ArgoCD app](https://github.com/alvarolop/rhoai-gitops/blob/c1ab1577d320d43fad41b52203a302ffc4af21f4/application-milvus.yaml).
-   4. **Open WebUI** using [ArgoCD app](https://github.com/alvarolop/rhoai-gitops/blob/c1ab1577d320d43fad41b52203a302ffc4af21f4/application-open-webui.yaml).
----
 
 ## 📚 Useful Resources
 

@@ -1,0 +1,268 @@
+# PIPELINE DEFINITION
+# Name: download-persist-pdf-to-milvus-pipeline
+# Inputs:
+#    document_url: str
+components:
+  comp-create-vectors:
+    executorLabel: exec-create-vectors
+    inputDefinitions:
+      parameters:
+        document:
+          parameterType: STRUCT
+        metadata:
+          parameterType: STRUCT
+    outputDefinitions:
+      parameters:
+        Output:
+          parameterType: LIST
+  comp-download-pdf:
+    executorLabel: exec-download-pdf
+    inputDefinitions:
+      parameters:
+        document_url:
+          parameterType: STRING
+    outputDefinitions:
+      parameters:
+        Output:
+          parameterType: STRUCT
+  comp-get-document-metadata:
+    executorLabel: exec-get-document-metadata
+    inputDefinitions:
+      parameters:
+        document_url:
+          parameterType: STRING
+    outputDefinitions:
+      parameters:
+        Output:
+          parameterType: STRUCT
+  comp-persist-vectors-on-milvus:
+    executorLabel: exec-persist-vectors-on-milvus
+    inputDefinitions:
+      parameters:
+        collection_name:
+          parameterType: STRING
+        vectors:
+          parameterType: LIST
+deploymentSpec:
+  executors:
+    exec-create-vectors:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - create_vectors
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.11.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'pymilvus' 'docling'\
+          \ 'pymilvus[model]' && \"$0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef create_vectors(document: dict, metadata: dict) -> list:\n   \
+          \ from docling.chunking import HybridChunker\n    chunker = HybridChunker(tokenizer=\"\
+          BAAI/bge-small-en-v1.5\")\n    embedding_fn = model.DefaultEmbeddingFunction()\n\
+          \    chunk_iter = chunker.chunk(document)\n    ## Create chunk_list with\
+          \ the parts of the document\n    chunk_list = list(chunk_iter)\n    chunk_vectors\
+          \ = embedding_fn.encode_documents([chunk.text for chunk in chunk_list])\n\
+          \    vectors = []\n    for i, chunk in enumerate(chunk_list):\n        print(\"\
+          adding vector for: \" + document.name + \" with hash=\" + hash(document.name))\n\
+          \        vectors.append({\n            # to avoid overriding the same id,\
+          \ hash the product_name\n            \"id\": hash(document.name),\n    \
+          \        \"product_name\": metadata.get(\"product_name\", \"null\"),\n \
+          \           \"version\": metadata.get(\"version\", \"null\"),\n        \
+          \    \"section\": metadata.get(\"section\", \"null\"),\n            \"language\"\
+          : metadata.get(\"language\", \"null\"),\n            \"vector\": chunk_vectors[i]\
+          \ ,\n            \"text\": chunk.text,\n        })\n    return vectors\n\
+          \n"
+        image: python:3.9
+    exec-download-pdf:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - download_pdf
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.11.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'docling' &&\
+          \ \"$0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef download_pdf(document_url: str) -> dict:\n    import os\n   \
+          \ os.environ[\"EASYOCR_MODEL_PATH\"] = \"/tmp/EasyOCR\"\n    from docling.document_converter\
+          \ import DocumentConverter\n    converter = DocumentConverter()\n    converted_source_file\
+          \ = converter.convert(document_url)\n    return converted_source_file.document.export_to_dict\n\
+          \n"
+        image: python:3.9
+    exec-get-document-metadata:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - get_document_metadata
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.11.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"' && \"\
+          $0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef get_document_metadata(document_url: str) -> dict:\n    from urllib.parse\
+          \ import urlparse\n    # Parse the URL to extract the path\n    parsed_url\
+          \ = urlparse(document_url)\n    # Extract the file name from the path\n\
+          \    file_name = parsed_url.path.split('/')[-1]\n\n    metadata = file_name.split(\"\
+          -\")\n    return {\n        \"product_name\": metadata[0],\n        \"version\"\
+          : metadata[2],\n        \"section\": metadata[3],\n        \"language\"\
+          : metadata[4]\n    }\n\n"
+        image: python:3.9
+    exec-persist-vectors-on-milvus:
+      container:
+        args:
+        - --executor_input
+        - '{{$}}'
+        - --function_to_execute
+        - persist_vectors_on_milvus
+        command:
+        - sh
+        - -c
+        - "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip ||\
+          \ python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1\
+          \ python3 -m pip install --quiet --no-warn-script-location 'kfp==2.11.0'\
+          \ '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&\
+          \  python3 -m pip install --quiet --no-warn-script-location 'pymilvus' &&\
+          \ \"$0\" \"$@\"\n"
+        - sh
+        - -ec
+        - 'program_path=$(mktemp -d)
+
+
+          printf "%s" "$0" > "$program_path/ephemeral_component.py"
+
+          _KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         "$program_path/ephemeral_component.py"                         "$@"
+
+          '
+        - "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import\
+          \ *\n\ndef persist_vectors_on_milvus(vectors: list, collection_name: str):\n\
+          \    from pymilvus import MilvusClient\n    milvus_client = MilvusClient(\"\
+          http://vectordb-milvus.milvus.svc.cluster.local:19530\", user=\"root\",\
+          \ password=\"Milvus\")\n\n    # Delete collection if the collection exists\n\
+          \    if milvus_client.has_collection(collection_name=collection_name):\n\
+          \        print(\"going to delete \", collection_name)\n        milvus_client.drop_collection(collection_name=collection_name)\n\
+          \    # Create collection\n    print(\"Creating Collection \", collection_name)\n\
+          \    milvus_client.create_collection(\n        collection_name=collection_name,\n\
+          \        dimension=768,  # The vectors we will use in this demo has 768\
+          \ dimensions\n    )\n    milvus_client.insert(collection_name=collection_name,\
+          \ data=vectors)\n\n"
+        image: python:3.9
+pipelineInfo:
+  name: download-persist-pdf-to-milvus-pipeline
+root:
+  dag:
+    tasks:
+      create-vectors:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-create-vectors
+        dependentTasks:
+        - download-pdf
+        - get-document-metadata
+        inputs:
+          parameters:
+            document:
+              taskOutputParameter:
+                outputParameterKey: Output
+                producerTask: download-pdf
+            metadata:
+              taskOutputParameter:
+                outputParameterKey: Output
+                producerTask: get-document-metadata
+        taskInfo:
+          name: create-vectors
+      download-pdf:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-download-pdf
+        inputs:
+          parameters:
+            document_url:
+              componentInputParameter: document_url
+        taskInfo:
+          name: download-pdf
+      get-document-metadata:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-get-document-metadata
+        inputs:
+          parameters:
+            document_url:
+              componentInputParameter: document_url
+        taskInfo:
+          name: get-document-metadata
+      persist-vectors-on-milvus:
+        cachingOptions:
+          enableCache: true
+        componentRef:
+          name: comp-persist-vectors-on-milvus
+        dependentTasks:
+        - create-vectors
+        inputs:
+          parameters:
+            collection_name:
+              runtimeValue:
+                constant: openshift_ai_documentation
+            vectors:
+              taskOutputParameter:
+                outputParameterKey: Output
+                producerTask: create-vectors
+        taskInfo:
+          name: persist-vectors-on-milvus
+  inputDefinitions:
+    parameters:
+      document_url:
+        parameterType: STRING
+schemaVersion: 2.1.0
+sdkVersion: kfp-2.11.0
