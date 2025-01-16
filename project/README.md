@@ -52,7 +52,7 @@ This structured approach ensures seamless integration of data ingestion and quer
 
 
 
-### 3. Kubeflow Pipeline to Ingest documents
+### 3.⚗️ Kubeflow Pipeline to Ingest documents
 
 This pipeline facilitates the ingestion of data for Retrieval-Augmented Generation (RAG) by automating the processing, vectorization, and storage of documents. Below is a detailed description of the workflow:
 
@@ -70,6 +70,8 @@ This pipeline facilitates the ingestion of data for Retrieval-Augmented Generati
 
 5. **Pipeline Compilation**  
    The workflow is compiled as a pipeline for execution using [Kubeflow Pipelines (KFP)](https://www.kubeflow.org/docs/components/pipelines/).
+
+![Kubeflow Pipeline Architecture](../docs/images/kfp.png "Kubeflow Pipeline Architecture")
 
 
 After the pipeline is defined, you can run the following command to generate the `.yaml` file:
