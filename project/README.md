@@ -25,7 +25,7 @@ The following architecture was implemented to solve the problem statement:
 
 Once the architecture is designed, we need to outline two main flows: **Data Ingestion** and **Query Execution**.
 
-### 1. Data Ingestion to RAG (Retrieval-Augmented Generation)
+### 1. ⚙️ Data Ingestion to RAG (Retrieval-Augmented Generation)
 
 This flow involves preparing and storing data for efficient retrieval by the RAG pipeline. Here’s an overview of the process:
 
@@ -38,7 +38,7 @@ Below is a diagram illustrating the data ingestion flow:
 
 ![Data ingestion into RAG](../docs/images/ingest-documents.png "Data ingestion into RAG")
 
-### 2. Query Execution with Mistral vLLM
+### 2. ❓ Query Execution with Mistral vLLM
 
 The query execution flow involves retrieving contextual data from Milvus and querying the language model for insights. The steps include:
 
@@ -52,7 +52,7 @@ This structured approach ensures seamless integration of data ingestion and quer
 
 
 
-### 3.⚗️ Kubeflow Pipeline to Ingest documents
+### 3. 🔗 Kubeflow Pipeline to Ingest documents
 
 This pipeline facilitates the ingestion of data for Retrieval-Augmented Generation (RAG) by automating the processing, vectorization, and storage of documents. Below is a detailed description of the workflow:
 
@@ -83,3 +83,17 @@ python download-persist-pdf-to-milvus.py
 ```
 
 Later, you will be able to access the RHOAI Dashboard, go to the Pipelines Server section and upload the pipeline manually.
+
+
+
+### 4. 🧮 Open WebUI 
+
+Finally, we also explored the possibility to use a nice UI like Open WebUI to access the RAG and check the documentation. For that reason, the Open WebUI is connected to Milvus, Nomic, and Mistral to use the same embeddings as in the Jupiter Notebook. 
+
+> [!TIP]  
+> Sadly, we didn't have enough time to make it work with the desired Milvus collection, so currently it is only possible to use the docs that are loaded directly from the Open WebUI screen.
+
+This is an example of how it looks like:
+
+
+![Open WebUI screenshot](../docs/images/open-webui.png "Open WebUI screenshot")
